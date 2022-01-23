@@ -16,7 +16,6 @@ function requestWeatherData(geoLocation) {
     fetch(apiUrl).then(function(response) {
        if(response.ok) {
            response.json().then(function(data) {
-                
                 const wxData = [];
                 const current_conditions = {
                     city: geoLocation.formatted_name.split(",")[0] + ", " + geoLocation.formatted_name.split(",")[1], 
