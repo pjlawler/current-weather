@@ -27,6 +27,7 @@ header {
     height: 500px;
     padding: 10px;
     border: black solid 3px;
+    margin-top: 41px;
 }
 
 #search_area input {
@@ -43,11 +44,13 @@ header {
 
 #search_area h2 {
     text-align: left;
+    font-weight: normal;
 }
 
 #search_area h3 {
     margin-top: 10px;
     text-align: center;
+    font-weight: normal;
 }
 .hr {
     width: 75%;
@@ -99,7 +102,7 @@ header {
 
 .card_header {
     text-align: center;
-    /* background: black; */
+    font-weight: normal;
 
 }
 
@@ -111,6 +114,8 @@ header {
 }
 
 #conditions_area h2 {
+    font-size: 36px;
+    font-weight: normal;
     text-align: center;
 }
 

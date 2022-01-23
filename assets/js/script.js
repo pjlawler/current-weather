@@ -2,7 +2,7 @@ const search_text = document.querySelector("#searched_city");
 const search_button = document.querySelector("#search_btn");
 const recent_area = document.createElement("div");
 recent_area.classList.add("recent_searches");
-const recent_searches = [];
+let recent_searches = [];
 
 function requestWeatherData(geoLocation) {
 
@@ -69,8 +69,8 @@ function getGeoLocationInfo(location) {
                     lat: data.results[0].geometry.lat,
                     long: data.results[0].geometry.lng
                 };
-                recent_searches.unshift(resultObj);
-                update_recents();
+                
+                update_recents(resultObj);
                 requestWeatherData(resultObj);
             });
         }
@@ -120,9 +120,18 @@ function displayWeather(weather) {
 
 }
 
-function update_recents() {
+function update_recents(searchObj) {
 
     const search_area = document.querySelector("#search_area");
+
+    if(searchObj) {
+        recent_searches.unshift(searchObj);
+        window.localStorage.setItem("searches", JSON.stringify(recent_searches));
+    }
+
+    const localStore = JSON.parse(window.localStorage.getItem("searches"));
+    
+    recent_searches = localStore !== null ? localStore : [];
 
     while(recent_area.firstChild) {
         recent_area.removeChild(recent_area.firstChild);
@@ -142,9 +151,6 @@ function update_recents() {
     }
 
     search_area.appendChild(recent_area);
-
-    
-
 }
 
 function direction(degrees) {
@@ -184,5 +190,12 @@ recent_area.addEventListener('click', function(e) {
     }
 })
 
+function start_up() {
+    update_recents();
+    if (recent_searches === null) {
+        return false;
+    }
+    requestWeatherData(recent_searches[0]);
+}
 
-
+start_up();
