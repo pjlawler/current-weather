@@ -14,7 +14,7 @@ const edina = {
 
 
 
-function getWeatherData(geoLocation) {
+function requestWeatherData(geoLocation) {
 
     // Gets the weather data for the passed in geolocation, once the data is receive it
     // will then execute the display weather function and pass the weather data to it.
@@ -38,7 +38,6 @@ function getWeatherData(geoLocation) {
                     wind_direction: data.current.wind_deg,
                     uv_index: data.current.uvi,
                     weather: data.current.weather[0]
-
                 };
 
                 wxData.push(current_conditions);
@@ -89,99 +88,42 @@ function getGeoLocationInfo(location) {
 
 
 function displayWeather(weather) {
-    if(!location) {
-        return false;
-    } 
- 
-    const currentContainerEl = document.querySelector("#current_conditions");
-    const forecastContainerEl = document.querySelector("#forecast");
     
-    // Display Current Conditions
+    const locationEl = document.querySelector("#location");
+    const currentTempEl = document.querySelector("#current_temp");
+    const currentDateEl = document.querySelector("#current_date");
+    const currentConditionsIconEl = document.querySelector("#current_icon");
+    const currentWindEl = document.querySelector("#current_wind");
+    const currentHumidity = document.querySelector("#current_humidity");
+    const currentUvi = document.querySelector("#current_uvi");
 
-    for(let i = 0; i < 7; i++) {
-        const dateEl = document.createElement("div");
-        const wxIconEl = document.createElement("img");
-        const tempEl = document.createElement("div");
-        const humidityEl = document.createElement("div");
-        const wind_dirEl = document.createElement("div");
-        const wind_speedEl = document.createElement("div");
-        const uviEl = document.createElement("div");
+    // Poplulates the current condtions
+    locationEl.textContent = weather[0].city
+    currentTempEl.textContent = Math.round(parseFloat(weather[0].temp)) + String.fromCodePoint(0x2109);
+    currentDateEl.textContent =  moment.unix(weather[0].date).format("dddd M/D/YY");
+    currentConditionsIconEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[0].weather.icon + "@2x.png");
+    currentWindEl.textContent = direction(weather[0].wind_direction) + " " + Math.round(weather[0].wind_speed) + " mph";
+    currentHumidity.textContent = weather[0].humidity + "%";
+    currentUvi.textContent = weather[0].uv_index;
 
-        //Sets the conditions into the elements for display
 
-        const current_block = document.createElement("div");
-        const currentHeadlineEl = document.createElement("div");
-
-        const iconImgEl = document.createElement("div");
-        iconImgEl.setAttribute("id","icon_container");
-
-        wxIconEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[i].weather.icon + "@2x.png");
-        wxIconEl.setAttribute("width", "50");
+    // Populates the 5-Day forecast
+    for(let i = 2; i < 7; i++) {
+        const parentEl = document.querySelector("[data-day='" + (i - 1) + "']");
+        const day_dateEl = parentEl.querySelector("h3");
+        const day_tempEl = parentEl.querySelector(".high_temp");
+        const day_imgEl = parentEl.querySelector("img");
+        const day_windEl = parentEl.querySelector(".wind");
+        const day_humidityEl = parentEl.querySelector(".humidity")
         
-        const wxDataEl = document.createElement("div");
-        wxDataEl.setAttribute("id", "data_container");
+        
+        day_dateEl.textContent = moment.unix(weather[i].date).format("ddd") + " (" + moment.unix(weather[i].date).format("M/D") +")" ;
+        day_tempEl.textContent = Math.round(parseFloat(weather[i].temp)) + String.fromCodePoint(0x2109);
+        day_imgEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[i].weather.icon + "@2x.png");
+        day_windEl.textContent = direction(weather[i].wind_direction) + " " + Math.round(weather[i].wind_speed) + " mph";
+        day_humidityEl.textContent = weather[i].humidity + "%";
 
 
-        tempEl.textContent =  "Temp: " + Math.round(parseFloat(weather[i].temp)) + String.fromCodePoint(0x2109);
-        wind_dirEl.textContent = "Wind: " + direction(weather[i].wind_direction) + " @ " + Math.round(weather[i].wind_speed) + " MPH";
-        humidityEl.textContent = "Humidity: " + weather[i].humidity + "%";
-        uviEl.textContent = "UV Index: " + weather[i].uv_index;
-
-
-
-
-        switch(i) {
-
-            case 0:
-                // Updates the current conditions for the searched location
-
-                const current_dateEl = document.createElement("h2");
-                current_dateEl.setAttribute("id", "#current_header");
-
-                const updated_timeEl = document.createElement("h3");
-                updated_timeEl.setAttribute("id", "#updated_time")
-                
-                // Sets the header to the current location and date
-                current_dateEl.textContent = weather[0].city + " - " + moment.unix(weather[i].date).format("dddd M/D/YY");
-                
-                // Sets the sub-header to the last time it was updated
-                updated_timeEl.textContent = "Last updated at: " + moment.unix(weather[i].date).format("Hmm") + " hours."; 
-
-                // Puts the weather elements into the current conditions container
-                currentHeadlineEl.appendChild(current_dateEl);
-                iconImgEl.appendChild(wxIconEl);
-                wxDataEl.appendChild(tempEl);
-                wxDataEl.appendChild(wind_dirEl);
-                wxDataEl.appendChild(humidityEl);
-                wxDataEl.appendChild(uviEl);
-                wxDataEl.appendChild(updated_timeEl);
-                
-                currentContainerEl.appendChild(currentHeadlineEl);
-                
-
-                break;
-            case 1:
-                // Skips the first forecast because that's the same day as the current
-                break;
-            
-            default:
-
-                // Updates the 5-day forecast cards
-
-                const dateEl = document.createElement("div");
-                const forecastCard = document.createElement("div");
-                forecastCard.classList.add("forecast_card");
-                 
-                dateEl.textContent = moment.unix(weather[i].date).format("ddd") + " (" + moment.unix(weather[i].date).format("M/D") + ")";
-                dateEl.classList.add("card_header");
-
-                forecastCard.appendChild(dateEl)
-                forecastCard.appendChild(wxIconEl);
-                forecastCard.appendChild(tempEl);
-                forecastCard.appendChild(wind_dirEl);
-                forecastCard.appendChild(humidityEl);
-                forecastContainerEl.appendChild(forecastCard);
-        };    
     }
 
 }
@@ -203,8 +145,7 @@ function direction(degrees) {
         return "W";
     } else if (degrees => 295 && degrees < 335) {
         return "NW"
-    }
-    else {
+    } else {
         return "N";
     }
 }
@@ -212,4 +153,5 @@ function direction(degrees) {
 
 // getGeoLocationInfo("Minneapolis");
 
-getWeatherData(edina);
+requestWeatherData(edina);
+

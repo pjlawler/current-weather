@@ -12,15 +12,17 @@ header {
 }
 
 #container {
-    width: 95%;
+    /* width: 1000px; */
     display: flex;
     justify-content: flex-start;
-    margin: 0 auto;
+    /* margin: 0 auto; */
     margin-top: 25px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 #search_area {
-    width: 300px;
+    flex: 1.5;
     padding: 10px;
     border: black solid 1px;
 }
@@ -37,8 +39,18 @@ header {
     height: 30px;
 }
 
+#search_area h2 {
+    text-align: left;
+}
+
+
+
 #conditions_area {
-   flex: 1;
+   flex: 4;
+}
+
+#conditions_area h2 {
+    text-align: center;
 }
 
 #current_conditions {
@@ -47,46 +59,67 @@ header {
     padding: 10px;
     line-height: 1.5;
     font-size: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-#search_area h2 {
-    text-align: left;
+#data_box {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: black 1px solid;
+    background: rgb(135, 222, 215);
 }
 
-#current_conditions h2 {
+#data_box img {
+    width: 150px;
+    flex: 1;
+}
+
+#data_box i {
+    text-align: center;
+    font-size: 55px;
+    flex: 1;
+}
+
+.card_header {
     text-align: center;
 }
 
-#current_conditions h3 {
-    margin: 0;
-    font-size: 14px;
-    font-style: italic;
-}
-
-#current_conditions img {
-    width: 150px;
+.conditions_box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
 }
 
 #forecast {
     display: flex;
-    flex-direction: row;
+    flex-direction: col;
     justify-content: space-between;
 }
 
-.forecast_card {
-
-    display: flex;
-    width: 18%;
-    flex-direction: column;
+.day_card {
+    flex: 1;
     border: black 1px solid;
-    background: cadetblue;
+    margin-top: 10px;
     margin-left: 10px;
-    margin-top: 15px;
-    padding: 10px;
-    font-size: 14px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.card_header {
-    margin: 0 auto;
-    font-size: 18px;
+.day_card h3 {
+    font-size: 20px;
 }
+
+.conditions_box i {
+    font-size: 28px;
+}
+
+.conditions_box img {
+    width: 50px;
+}
+
