@@ -1,33 +1,22 @@
-const duluth = {
-    searched_name: "Duluth, MN",
-    formatted_name: "Duluth, MN, USA",
-    lat: 46.50,
-    long: -94.0
-};
-
-const edina = {
-    searched_name: "Edina, MN",
-    formatted_name: "Edina, MN, USA",
-    lat: 44.9179504206,
-    long:  -93.3459846855
-};
-
-
+const search_text = document.querySelector("#searched_city");
+const search_button = document.querySelector("#search_btn");
+const recent_area = document.createElement("div");
+recent_area.classList.add("recent_searches");
+const recent_searches = [];
 
 function requestWeatherData(geoLocation) {
 
     // Gets the weather data for the passed in geolocation, once the data is receive it
     // will then execute the display weather function and pass the weather data to it.
 
-    const geoCity = "lat=" +geoLocation.lat + "&lon=" + geoLocation.long;
+    console.log(geoLocation);
+    const geoCity = "lat=" + geoLocation.lat + "&lon=" + geoLocation.long;
     const apiUrl = "https://api.openweathermap.org/data/2.5/onecall?" + geoCity + "&units=imperial&appid=ba8c04ec0a22a04686b4f84de12580c6"
-
-
 
     fetch(apiUrl).then(function(response) {
        if(response.ok) {
            response.json().then(function(data) {
-                console.log(data);
+                
                 const wxData = [];
                 const current_conditions = {
                     city: geoLocation.formatted_name.split(",")[0] + ", " + geoLocation.formatted_name.split(",")[1], 
@@ -53,15 +42,11 @@ function requestWeatherData(geoLocation) {
                     }
                     wxData.push(forcast_conditions);
                 }
-                console.log(wxData);
                 displayWeather(wxData);
            });
         } 
     });
 };
-
-
-
 
 function getGeoLocationInfo(location) {
 
@@ -72,15 +57,25 @@ function getGeoLocationInfo(location) {
     fetch(apiUrl).then(function(response) {
         if(response.ok) {
             response.json().then(function(data) {
-                console.log(data.results[0]);
+                
+                if(data.results.length === 0) {
+                    alert("Unable to get weather information for " + location + "! \nPlease re-enter a city to search.")
+                    return false;
+                }
+
                 resultObj = {
                     searched_name: location,
                     formatted_name: data.results[0].formatted,
                     lat: data.results[0].geometry.lat,
                     long: data.results[0].geometry.lng
                 };
-                getWeatherData(resultObj);
+                recent_searches.unshift(resultObj);
+                update_recents();
+                requestWeatherData(resultObj);
             });
+        }
+        else {
+            alert("Unable to get weather information for " + location + "! \nPlease re-enter a city to search.")
         } 
      });
 
@@ -116,18 +111,41 @@ function displayWeather(weather) {
         const day_windEl = parentEl.querySelector(".wind");
         const day_humidityEl = parentEl.querySelector(".humidity")
         
-        
         day_dateEl.textContent = moment.unix(weather[i].date).format("ddd") + " (" + moment.unix(weather[i].date).format("M/D") +")" ;
         day_tempEl.textContent = Math.round(parseFloat(weather[i].temp)) + String.fromCodePoint(0x2109);
         day_imgEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[i].weather.icon + "@2x.png");
         day_windEl.textContent = direction(weather[i].wind_direction) + " " + Math.round(weather[i].wind_speed) + " mph";
         day_humidityEl.textContent = weather[i].humidity + "%";
-
-
     }
 
 }
 
+function update_recents() {
+
+    const search_area = document.querySelector("#search_area");
+
+    while(recent_area.firstChild) {
+        recent_area.removeChild(recent_area.firstChild);
+    }
+
+    while(recent_searches.length > 8) {
+        recent_searches.pop();
+    }
+    
+    for(let i = 0; i < recent_searches.length; i++) {
+        const search = document.createElement("button")
+        search.classList.add("recent_btn");
+        search.setAttribute("data-index", i);
+        search.textContent = recent_searches[i].formatted_name.split(",")[0] + ", " + recent_searches[i].formatted_name.split(",")[1];
+        recent_area.appendChild(search);
+        console.log(recent_area);
+    }
+
+    search_area.appendChild(recent_area);
+
+    
+
+}
 
 function direction(degrees) {
     
@@ -150,8 +168,21 @@ function direction(degrees) {
     }
 }
 
+search_button.addEventListener("click", function(e) {
+    if (!search_text.value) {
+        return false;
+    }
+    getGeoLocationInfo(search_text.value);
+    search_text.value = "";
+    search_text.focus();
+});
 
-// getGeoLocationInfo("Minneapolis");
+recent_area.addEventListener('click', function(e) {
+    const button_clicked = e.target.getAttribute("data-index");
+    if(button_clicked) {
+        requestWeatherData(recent_searches[button_clicked]);
+    }
+})
 
-requestWeatherData(edina);
+
 
