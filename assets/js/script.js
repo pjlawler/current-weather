@@ -17,6 +17,7 @@ function requestWeatherData(geoLocation) {
        if(response.ok) {
            response.json().then(function(data) {
                 const wxData = [];
+                console.log(data);
                 const current_conditions = {
                     city: geoLocation.formatted_name.split(",")[0] + ", " + geoLocation.formatted_name.split(",")[1], 
                     date: data.current.dt,
@@ -27,7 +28,7 @@ function requestWeatherData(geoLocation) {
                     uv_index: data.current.uvi,
                     weather: data.current.weather[0]
                 };
-
+                console.log("uvi", data.current.uvi)
                 wxData.push(current_conditions);
 
                 for (let i = 0; i < 6; i++) {
@@ -98,7 +99,8 @@ function displayWeather(weather) {
     currentConditionsIconEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[0].weather.icon + "@2x.png");
     currentWindEl.textContent = direction(weather[0].wind_direction) + " " + Math.round(weather[0].wind_speed) + " mph";
     currentHumidity.textContent = weather[0].humidity + "%";
-    currentUvi.textContent = weather[0].uv_index;
+    currentUvi.textContent = uvi_formatted( weather[0].uv_index);
+    currentUvi.style.background = uvi_colorCode(weather[0].uv_index);
 
 
     // Populates the 5-Day forecast
@@ -170,6 +172,29 @@ function direction(degrees) {
         return "NW"
     } else {
         return "N";
+    }
+}
+
+function uvi_formatted(uvi) {
+    u = Math.round(parseFloat(uvi) * 10)/10
+    console.log(u);
+    if (!u) {
+        return "0.0";
+    } else if (u.length < 3) {
+        return u + ".0";
+    }
+    else {
+        return u;
+    }
+}
+
+function uvi_colorCode(level) {
+    if(level < 3) {
+        return "lime";  
+    } else if (level < 6) {
+        return "yellow";
+    } else {
+        return "tomato"
     }
 }
 
