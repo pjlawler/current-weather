@@ -8,16 +8,12 @@ function requestWeatherData(geoLocation) {
 
     // Gets the weather data for the passed in geolocation, once the data is receive it
     // will then execute the display weather function and pass the weather data to it.
-
-    console.log(geoLocation);
     const geoCity = "lat=" + geoLocation.lat + "&lon=" + geoLocation.long;
     const apiUrl = "https://api.openweathermap.org/data/2.5/onecall?" + geoCity + "&units=imperial&appid=ba8c04ec0a22a04686b4f84de12580c6"
-
     fetch(apiUrl).then(function(response) {
        if(response.ok) {
            response.json().then(function(data) {
-                const wxData = [];
-                console.log(data);
+                const wxData = [];                
                 const current_conditions = {
                     city: geoLocation.formatted_name.split(",")[0] + ", " + geoLocation.formatted_name.split(",")[1], 
                     date: data.current.dt,
@@ -28,9 +24,7 @@ function requestWeatherData(geoLocation) {
                     uv_index: data.current.uvi,
                     weather: data.current.weather[0]
                 };
-                console.log("uvi", data.current.uvi)
                 wxData.push(current_conditions);
-
                 for (let i = 0; i < 6; i++) {
                     forcast_conditions = {
                         date: data.daily[i].dt,
@@ -49,27 +43,21 @@ function requestWeatherData(geoLocation) {
 };
 
 function getGeoLocationInfo(location) {
-
     // If the user searches for a particular city, it will look up the geolocation information
-
     const apiUrl = "https://api.opencagedata.com/geocode/v1/json?q=" + location + "&key=36e0e7a2b5be4c5ab5d0a1055a5a7b06&language=en&pretty=1"
-
     fetch(apiUrl).then(function(response) {
         if(response.ok) {
             response.json().then(function(data) {
-                
                 if(data.results.length === 0) {
                     alert("Unable to get weather information for " + location + "! \nPlease re-enter a city to search.")
                     return false;
                 }
-
                 resultObj = {
                     searched_name: location,
                     formatted_name: data.results[0].formatted,
                     lat: data.results[0].geometry.lat,
                     long: data.results[0].geometry.lng
                 };
-                
                 update_recents(resultObj);
                 requestWeatherData(resultObj);
             });
@@ -81,9 +69,7 @@ function getGeoLocationInfo(location) {
 
 };
 
-
-function displayWeather(weather) {
-    
+function displayWeather(weather) {    
     const locationEl = document.querySelector("#location");
     const currentTempEl = document.querySelector("#current_temp");
     const currentDateEl = document.querySelector("#current_date");
@@ -111,51 +97,39 @@ function displayWeather(weather) {
         const day_imgEl = parentEl.querySelector("img");
         const day_windEl = parentEl.querySelector(".wind");
         const day_humidityEl = parentEl.querySelector(".humidity")
-        
         day_dateEl.textContent = moment.unix(weather[i].date).format("ddd") + " (" + moment.unix(weather[i].date).format("M/D") +")" ;
         day_tempEl.textContent = Math.round(parseFloat(weather[i].temp)) + String.fromCodePoint(0x2109);
-        day_imgEl.setAttribute("src", " http://openweathermap.org/img/wn/" + weather[i].weather.icon + "@2x.png");
+        day_imgEl.setAttribute("src", " https://openweathermap.org/img/wn/" + weather[i].weather.icon + "@2x.png");
         day_windEl.textContent = direction(weather[i].wind_direction) + " " + Math.round(weather[i].wind_speed) + " mph";
         day_humidityEl.textContent = weather[i].humidity + "%";
     }
-
 }
 
 function update_recents(searchObj) {
-
     const search_area = document.querySelector("#search_area");
-
     if(searchObj) {
         recent_searches.unshift(searchObj);
         window.localStorage.setItem("searches", JSON.stringify(recent_searches));
     }
-
     const localStore = JSON.parse(window.localStorage.getItem("searches"));
-    
     recent_searches = localStore !== null ? localStore : [];
-
     while(recent_area.firstChild) {
         recent_area.removeChild(recent_area.firstChild);
     }
-
     while(recent_searches.length > 8) {
         recent_searches.pop();
     }
-    
     for(let i = 0; i < recent_searches.length; i++) {
         const search = document.createElement("button")
         search.classList.add("recent_btn");
         search.setAttribute("data-index", i);
         search.textContent = recent_searches[i].formatted_name.split(",")[0] + ", " + recent_searches[i].formatted_name.split(",")[1];
         recent_area.appendChild(search);
-        console.log(recent_area);
     }
-
     search_area.appendChild(recent_area);
 }
 
 function direction(degrees) {
-    
     if(degrees => 25 && degrees < 65) {
         return "NE";
     } else if(degrees => 65 && degrees < 115) {
@@ -177,7 +151,6 @@ function direction(degrees) {
 
 function uvi_formatted(uvi) {
     u = Math.round(parseFloat(uvi) * 10)/10
-    console.log(u);
     if (!u) {
         return "0.0";
     } else if (u.length < 3) {
@@ -216,7 +189,7 @@ recent_area.addEventListener('click', function(e) {
 
 function start_up() {
     update_recents();
-    if (recent_searches === null) {
+    if (recent_searches === null || recent_searches.length === 0) {
         return false;
     }
     requestWeatherData(recent_searches[0]);
